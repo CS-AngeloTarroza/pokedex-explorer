@@ -26,20 +26,19 @@ function App() {
   const [showFilters, setShowFilters] = useState(false);
   const [sortBy, setSortBy] = useState('id');
   const [minStats, setMinStats] = useState({ hp: 0, attack: 0, defense: 0, speed: 0 });
-  const [generations, setGenerations] = useState([1]);
 
   // Fetch all Pokemon data on mount
   useEffect(() => {
     fetchPokemon();
-  }, [generations]);
+  }, []);
 
   const fetchPokemon = async () => {
     try {
       setLoading(true);
       setError(null);
       
-      // Determine limit based on selected generations
-      const limit = generations.includes(1) ? 151 : 251;
+      // Fetch all Pokémon up to Generation 9 (1025 total)
+      const limit = 1025;
       
       const response = await fetch(`https://pokeapi.co/api/v2/pokemon?limit=${limit}`);
       
@@ -195,7 +194,8 @@ function App() {
         <div className="text-center">
           <Loader2 className="w-16 h-16 text-white animate-spin mx-auto mb-4" />
           <p className="text-white text-2xl font-bold">Loading PokéDex...</p>
-          <p className="text-white text-sm mt-2">Fetching Pokémon data from PokéAPI</p>
+          <p className="text-white text-sm mt-2">Fetching 1025 Pokémon from PokéAPI</p>
+          <p className="text-white text-xs mt-1 opacity-75">This may take a moment...</p>
         </div>
       </div>
     );
@@ -230,7 +230,7 @@ function App() {
             ⚡ PokéDex Explorer
           </h1>
           <p className="text-white text-xl">
-            Discover and compare <span className="font-bold">{pokemon.length}+</span> Pokémon
+            Discover and compare <span className="font-bold">{pokemon.length}</span> Pokémon (Gen 1-9)
           </p>
           <p className="text-white text-sm mt-2 opacity-90">
             Advanced filtering • Real-time search • Interactive comparisons
@@ -753,7 +753,7 @@ function App() {
             Data provided by <a href="https://pokeapi.co" target="_blank" rel="noopener noreferrer" className="underline font-semibold">PokéAPI</a>
           </p>
           <p className="text-xs mt-2 opacity-75">
-            Built with React, Tailwind CSS, and Recharts • November 2025
+            Built with React, Tailwind CSS, and Recharts • All 1025 Pokémon (Gen 1-9)
           </p>
         </footer>
       </div>
