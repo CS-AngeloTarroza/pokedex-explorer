@@ -13,6 +13,19 @@ const TYPE_COLORS = {
 
 const TYPES = Object.keys(TYPE_COLORS);
 
+// Generation ranges (Pokédex numbers)
+const GENERATIONS = [
+  { id: 1, name: 'Gen 1 (Kanto)', range: [1, 151] },
+  { id: 2, name: 'Gen 2 (Johto)', range: [152, 251] },
+  { id: 3, name: 'Gen 3 (Hoenn)', range: [252, 386] },
+  { id: 4, name: 'Gen 4 (Sinnoh)', range: [387, 493] },
+  { id: 5, name: 'Gen 5 (Unova)', range: [494, 649] },
+  { id: 6, name: 'Gen 6 (Kalos)', range: [650, 721] },
+  { id: 7, name: 'Gen 7 (Alola)', range: [722, 809] },
+  { id: 8, name: 'Gen 8 (Galar)', range: [810, 905] },
+  { id: 9, name: 'Gen 9 (Paldea)', range: [906, 1025] }
+];
+
 function App() {
   // State management
   const [pokemon, setPokemon] = useState([]);
@@ -26,6 +39,7 @@ function App() {
   const [showFilters, setShowFilters] = useState(false);
   const [sortBy, setSortBy] = useState('id');
   const [minStats, setMinStats] = useState({ hp: 0, attack: 0, defense: 0, speed: 0 });
+  const [selectedGenerations, setSelectedGenerations] = useState([1, 2, 3, 4, 5, 6, 7, 8, 9]);
 
   // Fetch all Pokemon data on mount
   useEffect(() => {
@@ -84,8 +98,18 @@ function App() {
 
   // Filter and sort Pokemon based on criteria
   const filterPokemon = useCallback(
-    debounce((search, types, stats, sort) => {
+    debounce((search, types, stats, sort, generations) => {
       let filtered = [...pokemon];
+
+      // Generation filter
+      if (generations.length > 0 && generations.length < 9) {
+        filtered = filtered.filter(p => {
+          return generations.some(genId => {
+            const gen = GENERATIONS.find(g => g.id === genId);
+            return gen && p.id >= gen.range[0] && p.id <= gen.range[1];
+          });
+        });
+      }
 
       // Search filter
       if (search) {
@@ -146,14 +170,31 @@ function App() {
 
   // Apply filters whenever dependencies change
   useEffect(() => {
-    filterPokemon(searchTerm, selectedTypes, minStats, sortBy);
-  }, [searchTerm, selectedTypes, minStats, sortBy, filterPokemon]);
+    filterPokemon(searchTerm, selectedTypes, minStats, sortBy, selectedGenerations);
+  }, [searchTerm, selectedTypes, minStats, sortBy, selectedGenerations, filterPokemon]);
 
   // Toggle type selection
   const toggleType = (type) => {
     setSelectedTypes(prev =>
       prev.includes(type) ? prev.filter(t => t !== type) : [...prev, type]
     );
+  };
+
+  // Toggle generation selection
+  const toggleGeneration = (genId) => {
+    setSelectedGenerations(prev =>
+      prev.includes(genId) ? prev.filter(g => g !== genId) : [...prev, genId]
+    );
+  };
+
+  // Select all generations
+  const selectAllGenerations = () => {
+    setSelectedGenerations([1, 2, 3, 4, 5, 6, 7, 8, 9]);
+  };
+
+  // Deselect all generations
+  const deselectAllGenerations = () => {
+    setSelectedGenerations([]);
   };
 
   // Comparison functions
@@ -323,6 +364,47 @@ function App() {
                 </div>
               </div>
 
+              {/* Generation Filters */}
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <label className="text-sm font-bold text-gray-700">
+                    Filter by Generation: {selectedGenerations.length > 0 && `(${selectedGenerations.length} selected)`}
+                  </label>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={selectAllGenerations}
+                      className="text-xs px-3 py-1 bg-blue-100 text-blue-700 rounded-full hover:bg-blue-200 font-semibold"
+                    >
+                      Select All
+                    </button>
+                    <button
+                      onClick={deselectAllGenerations}
+                      className="text-xs px-3 py-1 bg-gray-100 text-gray-700 rounded-full hover:bg-gray-200 font-semibold"
+                    >
+                      Clear
+                    </button>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                  {GENERATIONS.map(gen => (
+                    <button
+                      key={gen.id}
+                      onClick={() => toggleGeneration(gen.id)}
+                      className={`px-4 py-3 rounded-lg text-sm font-bold transition shadow-md ${
+                        selectedGenerations.includes(gen.id)
+                          ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white transform scale-105'
+                          : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                      }`}
+                    >
+                      <div>{gen.name}</div>
+                      <div className="text-xs font-normal opacity-90">
+                        #{gen.range[0]}-{gen.range[1]}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
               {/* Minimum Stats Filters */}
               <div>
                 <label className="block text-sm font-bold mb-3 text-gray-700">Minimum Stats:</label>
@@ -353,11 +435,12 @@ function App() {
             <span className="text-gray-600 font-semibold">
               Showing <span className="text-blue-600 font-bold">{filteredPokemon.length}</span> of {pokemon.length} Pokémon
             </span>
-            {(searchTerm || selectedTypes.length > 0 || Object.values(minStats).some(v => v > 0)) && (
+            {(searchTerm || selectedTypes.length > 0 || selectedGenerations.length < 9 || Object.values(minStats).some(v => v > 0)) && (
               <button
                 onClick={() => {
                   setSearchTerm('');
                   setSelectedTypes([]);
+                  setSelectedGenerations([1, 2, 3, 4, 5, 6, 7, 8, 9]);
                   setMinStats({ hp: 0, attack: 0, defense: 0, speed: 0 });
                 }}
                 className="text-red-500 hover:text-red-700 font-semibold"
