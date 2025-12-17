@@ -65,7 +65,7 @@ PokéDex Explorer is a comprehensive web application that allows users to explor
 ### 📊 Pokémon Comparison
 
 - **Side-by-Side Comparison**: Compare up to 3 Pokémon simultaneously.
-- **Radar Chart Visualization**: Visual representation of stat distributions
+- **Radar Chart Visualization**: Visual representation of stat distributions.
 - **Bar Chart Analysis**: Detailed stat comparisons in bar format
 - **Real-time Updates**: Dynamic chart updates as Pokémon are added/removed
 
