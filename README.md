@@ -627,7 +627,7 @@ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
 **Angelo Tarroza**
 - GitHub: [@CS-AngeloTarroza](https://github.com/CS-AngeloTarroza)
 - LinkedIn: [Angelo Tarroza](https://linkedin.com/in/angelotarroza)
-- Email: angelo.tarroza@example.com
+- Email: angelotarroza15@gmail.com
 - Portfolio: [CS-AngeloTarroza](https://github.com/CS-AngeloTarroza)
 
 **Project Link**: [https://github.com/CS-AngeloTarroza/pokedex-explorer](https://github.com/CS-AngeloTarroza/pokedex-explorer)
