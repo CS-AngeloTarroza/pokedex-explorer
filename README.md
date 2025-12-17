@@ -56,11 +56,11 @@ PokéDex Explorer is a comprehensive web application that allows users to explor
 
 ### 🔍 Advanced Search & Filtering
 
-- **Real-time Search**: Search Pokémon by name or Pokédex number
-- **Type Filtering**: Filter by 18 different Pokémon types
-- **Stat Filtering**: Set minimum values for HP, Attack, Defense, and Speed
-- **Multi-Sort Options**: Sort by Pokédex number, name, HP, Attack, or total stats
-- **Debounced Input**: Optimized search with 300ms delay to reduce API calls by 70%
+- **Real-time Search**: Search Pokémon by name or Pokédex number.
+- **Type Filtering**: Filter by 18 different Pokémon types.
+- **Stat Filtering**: Set minimum values for HP, Attack, Defense, and Speed.
+- **Multi-Sort Options**: Sort by Pokédex number, name, HP, Attack, or total stats.
+- **Debounced Input**: Optimized search with 300ms delay to reduce API calls by 70%.
 
 ### 📊 Pokémon Comparison
 
