@@ -1,4 +1,4 @@
-﻿# ⚡ PokéDex Explorer
+﻿# ⚡ PokéDex Explorer ⚡
 
 <div align="center">
 
