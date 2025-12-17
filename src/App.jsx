@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Search, X, Zap, Shield, Heart, Swords, Filter, ChevronDown, Loader2, TrendingUp, Award, Info } from 'lucide-react';
+import { Search, X, Zap, Shield, Heart, Swords, Filter, ChevronDown, Loader2, TrendingUp, Award, Info, Moon, Sun } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, BarChart, Bar } from 'recharts';
 
 // Type colors configuration
@@ -40,6 +40,7 @@ function App() {
   const [sortBy, setSortBy] = useState('id');
   const [minStats, setMinStats] = useState({ hp: 0, attack: 0, defense: 0, speed: 0 });
   const [selectedGenerations, setSelectedGenerations] = useState([1, 2, 3, 4, 5, 6, 7, 8, 9]);
+  const [darkMode, setDarkMode] = useState(false);
 
   // Fetch all Pokemon data on mount
   useEffect(() => {
@@ -231,7 +232,7 @@ function App() {
   // Loading state
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 flex items-center justify-center">
+      <div className={`min-h-screen ${darkMode ? 'bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900' : 'bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500'} flex items-center justify-center`}>
         <div className="text-center">
           <Loader2 className="w-16 h-16 text-white animate-spin mx-auto mb-4" />
           <p className="text-white text-2xl font-bold">Loading PokéDex...</p>
@@ -263,10 +264,21 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 p-4">
+    <div className={`min-h-screen ${darkMode ? 'bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900' : 'bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500'} p-4 transition-colors duration-300`}>
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <header className="text-center mb-8">
+        <header className="text-center mb-8 relative">
+          {/* Dark Mode Toggle */}
+          <div className="absolute top-0 right-0 z-10">
+            <button
+              onClick={() => setDarkMode(!darkMode)}
+              className={`p-3 rounded-full ${darkMode ? 'bg-gray-800 text-yellow-400' : 'bg-white text-gray-800'} shadow-lg hover:scale-110 transition-all`}
+              aria-label="Toggle dark mode"
+            >
+              {darkMode ? <Sun className="w-6 h-6" /> : <Moon className="w-6 h-6" />}
+            </button>
+          </div>
+          
           <h1 className="text-6xl font-bold text-white mb-3 drop-shadow-lg">
             ⚡ PokéDex Explorer
           </h1>
@@ -279,17 +291,17 @@ function App() {
         </header>
 
         {/* Search and Filter Panel */}
-        <div className="bg-white rounded-xl shadow-2xl p-6 mb-6">
+        <div className={`${darkMode ? 'bg-gray-800 text-white' : 'bg-white'} rounded-xl shadow-2xl p-6 mb-6 transition-colors duration-300`}>
           <div className="flex flex-col md:flex-row gap-4 mb-4">
             {/* Search Bar */}
             <div className="flex-1 relative">
-              <Search className="absolute left-3 top-3 text-gray-400 w-5 h-5" />
+              <Search className={`absolute left-3 top-3 ${darkMode ? 'text-gray-400' : 'text-gray-400'} w-5 h-5`} />
               <input
                 type="text"
                 placeholder="Search by name or Pokédex number..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none text-lg"
+                className={`w-full pl-10 pr-4 py-3 border-2 ${darkMode ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' : 'bg-white border-gray-300'} rounded-lg focus:border-blue-500 focus:outline-none text-lg`}
               />
               {searchTerm && (
                 <button
@@ -317,7 +329,7 @@ function App() {
             <div className="space-y-6 pt-6 border-t">
               {/* Sort Options */}
               <div>
-                <label className="block text-sm font-bold mb-3 text-gray-700">Sort By:</label>
+                <label className={`block text-sm font-bold mb-3 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Sort By:</label>
                 <div className="flex flex-wrap gap-2">
                   {[
                     { value: 'id', label: 'Pokédex #' },
@@ -332,7 +344,7 @@ function App() {
                       className={`px-4 py-2 rounded-lg font-semibold transition ${
                         sortBy === option.value
                           ? 'bg-blue-500 text-white shadow-lg'
-                          : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                          : darkMode ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                       }`}
                     >
                       {option.label}
@@ -343,7 +355,7 @@ function App() {
 
               {/* Type Filters */}
               <div>
-                <label className="block text-sm font-bold mb-3 text-gray-700">
+                <label className={`block text-sm font-bold mb-3 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
                   Filter by Type: {selectedTypes.length > 0 && `(${selectedTypes.length} selected)`}
                 </label>
                 <div className="flex flex-wrap gap-2">
@@ -354,7 +366,7 @@ function App() {
                       className={`px-4 py-2 rounded-full text-sm font-bold transition shadow-md ${
                         selectedTypes.includes(type)
                           ? 'text-white transform scale-110'
-                          : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                          : darkMode ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                       }`}
                       style={selectedTypes.includes(type) ? { backgroundColor: TYPE_COLORS[type] } : {}}
                     >
@@ -367,7 +379,7 @@ function App() {
               {/* Generation Filters */}
               <div>
                 <div className="flex items-center justify-between mb-3">
-                  <label className="text-sm font-bold text-gray-700">
+                  <label className={`text-sm font-bold ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
                     Filter by Generation: {selectedGenerations.length > 0 && `(${selectedGenerations.length} selected)`}
                   </label>
                   <div className="flex gap-2">
@@ -393,7 +405,7 @@ function App() {
                       className={`px-4 py-3 rounded-lg text-sm font-bold transition shadow-md ${
                         selectedGenerations.includes(gen.id)
                           ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white transform scale-105'
-                          : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                          : darkMode ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                       }`}
                     >
                       <div>{gen.name}</div>
@@ -407,11 +419,11 @@ function App() {
 
               {/* Minimum Stats Filters */}
               <div>
-                <label className="block text-sm font-bold mb-3 text-gray-700">Minimum Stats:</label>
+                <label className={`block text-sm font-bold mb-3 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Minimum Stats:</label>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   {['hp', 'attack', 'defense', 'speed'].map(stat => (
                     <div key={stat}>
-                      <label className="block text-xs font-semibold mb-2 capitalize text-gray-600">
+                      <label className={`block text-xs font-semibold mb-2 capitalize ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
                         Min {stat}: {minStats[stat]}
                       </label>
                       <input
@@ -432,7 +444,7 @@ function App() {
 
           {/* Results Counter */}
           <div className="mt-4 flex items-center justify-between text-sm">
-            <span className="text-gray-600 font-semibold">
+            <span className={`font-semibold ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
               Showing <span className="text-blue-600 font-bold">{filteredPokemon.length}</span> of {pokemon.length} Pokémon
             </span>
             {(searchTerm || selectedTypes.length > 0 || selectedGenerations.length < 9 || Object.values(minStats).some(v => v > 0)) && (
@@ -453,9 +465,9 @@ function App() {
 
         {/* Comparison Panel */}
         {compareList.length > 0 && (
-          <div className="bg-white rounded-xl shadow-2xl p-6 mb-6">
+          <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-xl shadow-2xl p-6 mb-6 transition-colors duration-300`}>
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-3xl font-bold text-gray-800 flex items-center gap-2">
+              <h2 className={`text-3xl font-bold ${darkMode ? 'text-white' : 'text-gray-800'} flex items-center gap-2`}>
                 <TrendingUp className="w-8 h-8 text-blue-500" />
                 Compare Pokémon
               </h2>
@@ -515,8 +527,8 @@ function App() {
             {/* Comparison Charts */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Radar Chart */}
-              <div className="bg-gray-50 rounded-lg p-4">
-                <h3 className="font-bold text-lg mb-4 text-center">Stats Comparison (Radar)</h3>
+              <div className={`${darkMode ? 'bg-gray-700' : 'bg-gray-50'} rounded-lg p-4`}>
+                <h3 className={`font-bold text-lg mb-4 text-center ${darkMode ? 'text-white' : ''}`}>Stats Comparison (Radar)</h3>
                 <ResponsiveContainer width="100%" height={300}>
                   <RadarChart data={getComparisonData()}>
                     <PolarGrid />
@@ -538,8 +550,8 @@ function App() {
               </div>
 
               {/* Bar Chart */}
-              <div className="bg-gray-50 rounded-lg p-4">
-                <h3 className="font-bold text-lg mb-4 text-center">Stats Comparison (Bar)</h3>
+              <div className={`${darkMode ? 'bg-gray-700' : 'bg-gray-50'} rounded-lg p-4`}>
+                <h3 className={`font-bold text-lg mb-4 text-center ${darkMode ? 'text-white' : ''}`}>Stats Comparison (Bar)</h3>
                 <ResponsiveContainer width="100%" height={300}>
                   <BarChart data={getComparisonData()}>
                     <CartesianGrid strokeDasharray="3 3" />
@@ -563,17 +575,17 @@ function App() {
 
         {/* Pokemon Grid */}
         {filteredPokemon.length === 0 ? (
-          <div className="bg-white rounded-xl shadow-2xl p-12 text-center">
+          <div className={`${darkMode ? 'bg-gray-800 text-white' : 'bg-white'} rounded-xl shadow-2xl p-12 text-center transition-colors duration-300`}>
             <div className="text-6xl mb-4">🔍</div>
-            <h3 className="text-2xl font-bold text-gray-800 mb-2">No Pokémon Found</h3>
-            <p className="text-gray-600">Try adjusting your filters or search criteria</p>
+            <h3 className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-800'} mb-2`}>No Pokémon Found</h3>
+            <p className={darkMode ? 'text-gray-400' : 'text-gray-600'}>Try adjusting your filters or search criteria</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {filteredPokemon.map(p => (
               <div
                 key={p.id}
-                className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:scale-105 cursor-pointer"
+                className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:scale-105 cursor-pointer`}
                 onClick={() => setSelectedPokemon(p)}
               >
                 {/* Pokemon Image */}
@@ -590,7 +602,7 @@ function App() {
 
                 {/* Pokemon Info */}
                 <div className="p-4">
-                  <h3 className="text-2xl font-bold capitalize mb-2">{p.name}</h3>
+                  <h3 className={`text-2xl font-bold capitalize mb-2 ${darkMode ? 'text-white' : ''}`}>{p.name}</h3>
                   
                   {/* Types */}
                   <div className="flex gap-2 mb-3 flex-wrap">
