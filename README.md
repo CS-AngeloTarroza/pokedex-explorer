@@ -43,9 +43,9 @@ PokéDex Explorer is a comprehensive web application that allows users to explor
 
 ### Key Highlights
 
-- 🔍 **Smart Search**: Real-time search with 300ms debouncing
-- 🎨 **Modern UI**: Gradient backgrounds, smooth animations, and responsive design
-- 📊 **Data Visualization**: Interactive charts using Recharts library
+- 🔍 **Smart Search**: Real-time search with 300ms debouncing.
+- 🎨 **Modern UI**: Gradient backgrounds, smooth animations, and responsive design.
+- 📊 **Data Visualization**: Interactive charts using Recharts library.
 - ⚡ **Performance Optimized**: Reduced API calls by 70% through debouncing
 - 📱 **Mobile-First**: Fully responsive across all devices
 - 🎮 **Interactive**: Compare up to 3 Pokémon side-by-side
