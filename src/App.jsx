@@ -41,6 +41,8 @@ function App() {
   const [minStats, setMinStats] = useState({ hp: 0, attack: 0, defense: 0, speed: 0 });
   const [selectedGenerations, setSelectedGenerations] = useState([1, 2, 3, 4, 5, 6, 7, 8, 9]);
   const [darkMode, setDarkMode] = useState(false);
+  const [evolutionChain, setEvolutionChain] = useState(null);
+  const [loadingEvolution, setLoadingEvolution] = useState(false);
 
   // Fetch all Pokemon data on mount
   useEffect(() => {
@@ -80,6 +82,9 @@ function App() {
       const validPokemon = detailedPokemon.filter(p => p !== null);
       setPokemon(validPokemon);
       setFilteredPokemon(validPokemon);
+      
+      // Store pokemon globally for evolution chain navigation
+      window.pokemon = validPokemon;
     } catch (err) {
       setError(err.message);
       console.error('Error fetching Pokemon:', err);
@@ -229,6 +234,63 @@ function App() {
     return p.stats.reduce((sum, s) => sum + s.base_stat, 0);
   };
 
+  // Fetch evolution chain
+  const fetchEvolutionChain = async (pokemonId) => {
+    try {
+      setLoadingEvolution(true);
+      setEvolutionChain(null);
+
+      // First, get the species data to find the evolution chain URL
+      const speciesResponse = await fetch(`https://pokeapi.co/api/v2/pokemon-species/${pokemonId}`);
+      const speciesData = await speciesResponse.json();
+
+      // Then fetch the evolution chain
+      const evolutionResponse = await fetch(speciesData.evolution_chain.url);
+      const evolutionData = await evolutionResponse.json();
+
+      // Parse the evolution chain
+      const chain = [];
+      let currentStage = evolutionData.chain;
+
+      const addToChain = async (stage) => {
+        const pokemonName = stage.species.name;
+        const pokemonId = stage.species.url.split('/').filter(Boolean).pop();
+        
+        // Fetch Pokemon details for image
+        const pokemonResponse = await fetch(`https://pokeapi.co/api/v2/pokemon/${pokemonId}`);
+        const pokemonData = await pokemonResponse.json();
+
+        chain.push({
+          name: pokemonName,
+          id: pokemonId,
+          image: pokemonData.sprites.other['official-artwork'].front_default,
+          types: pokemonData.types
+        });
+
+        if (stage.evolves_to.length > 0) {
+          for (const evolution of stage.evolves_to) {
+            await addToChain(evolution);
+          }
+        }
+      };
+
+      await addToChain(currentStage);
+      setEvolutionChain(chain);
+    } catch (err) {
+      console.error('Error fetching evolution chain:', err);
+      setEvolutionChain([]);
+    } finally {
+      setLoadingEvolution(false);
+    }
+  };
+
+  // Fetch evolution chain when a Pokemon is selected
+  useEffect(() => {
+    if (selectedPokemon) {
+      fetchEvolutionChain(selectedPokemon.id);
+    }
+  }, [selectedPokemon]);
+
   // Loading state
   if (loading) {
     return (
@@ -264,7 +326,7 @@ function App() {
   }
 
   return (
-    <div className={`min-h-screen ${darkMode ? 'bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900' : 'bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500'} p-4 transition-colors duration-300`}>
+    <div className={`min-h-screen ${darkMode ? 'bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900' : 'bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500'} p-4 transition-all duration-700 ease-in-out`}>
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <header className="text-center mb-8 relative">
@@ -272,7 +334,7 @@ function App() {
           <div className="absolute top-0 right-0 z-10">
             <button
               onClick={() => setDarkMode(!darkMode)}
-              className={`p-3 rounded-full ${darkMode ? 'bg-gray-800 text-yellow-400' : 'bg-white text-gray-800'} shadow-lg hover:scale-110 transition-all`}
+              className={`p-3 rounded-full ${darkMode ? 'bg-gray-800 text-yellow-400' : 'bg-white text-gray-800'} shadow-lg hover:scale-110 transition-all duration-300`}
               aria-label="Toggle dark mode"
             >
               {darkMode ? <Sun className="w-6 h-6" /> : <Moon className="w-6 h-6" />}
@@ -291,7 +353,7 @@ function App() {
         </header>
 
         {/* Search and Filter Panel */}
-        <div className={`${darkMode ? 'bg-gray-800 text-white' : 'bg-white'} rounded-xl shadow-2xl p-6 mb-6 transition-colors duration-300`}>
+        <div className={`${darkMode ? 'bg-gray-800 text-white' : 'bg-white'} rounded-xl shadow-2xl p-6 mb-6 transition-all duration-500 ease-in-out`}>
           <div className="flex flex-col md:flex-row gap-4 mb-4">
             {/* Search Bar */}
             <div className="flex-1 relative">
@@ -301,7 +363,7 @@ function App() {
                 placeholder="Search by name or Pokédex number..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className={`w-full pl-10 pr-4 py-3 border-2 ${darkMode ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' : 'bg-white border-gray-300'} rounded-lg focus:border-blue-500 focus:outline-none text-lg`}
+                className={`w-full pl-10 pr-4 py-3 border-2 ${darkMode ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' : 'bg-white border-gray-300'} rounded-lg focus:border-blue-500 focus:outline-none text-lg transition-all duration-500 ease-in-out`}
               />
               {searchTerm && (
                 <button
@@ -341,7 +403,7 @@ function App() {
                     <button
                       key={option.value}
                       onClick={() => setSortBy(option.value)}
-                      className={`px-4 py-2 rounded-lg font-semibold transition ${
+                      className={`px-4 py-2 rounded-lg font-semibold transition-all duration-300 ${
                         sortBy === option.value
                           ? 'bg-blue-500 text-white shadow-lg'
                           : darkMode ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
@@ -363,7 +425,7 @@ function App() {
                     <button
                       key={type}
                       onClick={() => toggleType(type)}
-                      className={`px-4 py-2 rounded-full text-sm font-bold transition shadow-md ${
+                      className={`px-4 py-2 rounded-full text-sm font-bold transition-all duration-300 shadow-md ${
                         selectedTypes.includes(type)
                           ? 'text-white transform scale-110'
                           : darkMode ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
@@ -402,7 +464,7 @@ function App() {
                     <button
                       key={gen.id}
                       onClick={() => toggleGeneration(gen.id)}
-                      className={`px-4 py-3 rounded-lg text-sm font-bold transition shadow-md ${
+                      className={`px-4 py-3 rounded-lg text-sm font-bold transition-all duration-300 shadow-md ${
                         selectedGenerations.includes(gen.id)
                           ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white transform scale-105'
                           : darkMode ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
@@ -465,7 +527,7 @@ function App() {
 
         {/* Comparison Panel */}
         {compareList.length > 0 && (
-          <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-xl shadow-2xl p-6 mb-6 transition-colors duration-300`}>
+          <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-xl shadow-2xl p-6 mb-6 transition-all duration-500 ease-in-out`}>
             <div className="flex items-center justify-between mb-6">
               <h2 className={`text-3xl font-bold ${darkMode ? 'text-white' : 'text-gray-800'} flex items-center gap-2`}>
                 <TrendingUp className="w-8 h-8 text-blue-500" />
@@ -575,7 +637,7 @@ function App() {
 
         {/* Pokemon Grid */}
         {filteredPokemon.length === 0 ? (
-          <div className={`${darkMode ? 'bg-gray-800 text-white' : 'bg-white'} rounded-xl shadow-2xl p-12 text-center transition-colors duration-300`}>
+          <div className={`${darkMode ? 'bg-gray-800 text-white' : 'bg-white'} rounded-xl shadow-2xl p-12 text-center transition-all duration-500 ease-in-out`}>
             <div className="text-6xl mb-4">🔍</div>
             <h3 className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-800'} mb-2`}>No Pokémon Found</h3>
             <p className={darkMode ? 'text-gray-400' : 'text-gray-600'}>Try adjusting your filters or search criteria</p>
@@ -796,6 +858,59 @@ function App() {
                       </span>
                     ))}
                   </div>
+                </div>
+
+                {/* Evolution Chain Section */}
+                <div className="mb-6">
+                  <h3 className="font-bold text-2xl mb-4 flex items-center gap-2">
+                    🔄 Evolution Chain
+                  </h3>
+                  {loadingEvolution ? (
+                    <div className="flex items-center justify-center py-8">
+                      <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
+                      <span className="ml-3 text-gray-600">Loading evolution chain...</span>
+                    </div>
+                  ) : evolutionChain && evolutionChain.length > 0 ? (
+                    <div className="flex flex-wrap items-center justify-center gap-4">
+                      {evolutionChain.map((evo, index) => (
+                        <React.Fragment key={evo.id}>
+                          <div 
+                            className="flex flex-col items-center p-4 bg-gradient-to-br from-blue-50 to-purple-50 rounded-xl border-2 border-blue-200 hover:scale-105 transition-transform cursor-pointer shadow-lg"
+                            onClick={() => {
+                              const pokemon = window.pokemon?.find(p => p.id === parseInt(evo.id));
+                              if (pokemon) setSelectedPokemon(pokemon);
+                            }}
+                          >
+                            <img 
+                              src={evo.image} 
+                              alt={evo.name} 
+                              className="w-24 h-24 object-contain"
+                            />
+                            <p className="font-bold capitalize mt-2 text-gray-800">{evo.name}</p>
+                            <p className="text-xs text-gray-500">#{String(evo.id).padStart(3, '0')}</p>
+                            <div className="flex gap-1 mt-2">
+                              {evo.types.map(t => (
+                                <span
+                                  key={t.type.name}
+                                  className="px-2 py-1 rounded-full text-white text-xs font-bold"
+                                  style={{ backgroundColor: TYPE_COLORS[t.type.name] }}
+                                >
+                                  {t.type.name}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                          {index < evolutionChain.length - 1 && (
+                            <div className="text-3xl text-blue-500 font-bold">→</div>
+                          )}
+                        </React.Fragment>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8 bg-gray-50 rounded-lg">
+                      <p className="text-gray-600">No evolution data available</p>
+                    </div>
+                  )}
                 </div>
 
                 {/* Additional Info */}
