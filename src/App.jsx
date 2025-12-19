@@ -1032,6 +1032,122 @@ function App() {
           </div>
         )}
 
+{/* Team Builder Panel */}
+{showTeamBuilder && (
+  <div className="fixed right-0 top-0 h-full w-full sm:w-[420px] bg-white shadow-2xl z-50 overflow-y-auto">
+    <div className="p-6 border-b flex items-center justify-between">
+      <h2 className="text-2xl font-bold flex items-center gap-2">
+        <Users className="w-6 h-6 text-green-500" />
+        Team Builder ({team.length}/6)
+      </h2>
+      <button
+        onClick={() => setShowTeamBuilder(false)}
+        className="p-2 rounded-full hover:bg-gray-100"
+      >
+        <X className="w-6 h-6" />
+      </button>
+    </div>
+
+    <div className="p-6 space-y-6">
+      {/* Team Members */}
+      <div>
+        <h3 className="font-bold text-lg mb-3">Your Team</h3>
+
+        {team.length === 0 ? (
+          <p className="text-gray-500 text-sm">
+            No Pokémon added yet. Click “Add to Team” on any Pokémon.
+          </p>
+        ) : (
+          <div className="space-y-3">
+            {team.map(p => (
+              <div
+                key={p.id}
+                className="flex items-center gap-3 bg-gray-50 p-3 rounded-lg shadow-sm"
+              >
+                <img
+                  src={p.sprites.other['official-artwork'].front_default}
+                  alt={p.name}
+                  className="w-14 h-14"
+                />
+                <div className="flex-1">
+                  <p className="font-bold capitalize">{p.name}</p>
+                  <div className="flex gap-1 mt-1 flex-wrap">
+                    {p.types.map(t => (
+                      <span
+                        key={t.type.name}
+                        className="px-2 py-0.5 text-xs font-bold rounded-full text-white"
+                        style={{ backgroundColor: TYPE_COLORS[t.type.name] }}
+                      >
+                        {t.type.name}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+                <button
+                  onClick={() => removeFromTeam(p.id)}
+                  className="text-red-500 hover:text-red-700"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Team Type Coverage */}
+      {team.length > 0 && (
+        <div>
+          <h3 className="font-bold text-lg mb-3">Type Coverage</h3>
+          <div className="flex flex-wrap gap-2">
+            {Object.entries(getTeamTypeCoverage()).map(([type, count]) => (
+              <span
+                key={type}
+                className="px-3 py-1 rounded-full text-white text-sm font-bold"
+                style={{ backgroundColor: TYPE_COLORS[type] }}
+              >
+                {type.toUpperCase()} ×{count}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Team Average Stats */}
+      {team.length > 0 && getTeamAverageStats() && (
+        <div>
+          <h3 className="font-bold text-lg mb-3">Average Stats</h3>
+          <div className="grid grid-cols-2 gap-3 text-sm">
+            {Object.entries(getTeamAverageStats()).map(([stat, value]) => (
+              <div
+                key={stat}
+                className="flex justify-between bg-gray-100 p-2 rounded"
+              >
+                <span className="capitalize font-semibold">
+                  {stat.replace('-', ' ')}
+                </span>
+                <span className="font-bold">{value}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Clear Team */}
+      {team.length > 0 && (
+        <button
+          onClick={clearTeam}
+          className="w-full py-3 bg-red-500 text-white rounded-lg font-bold hover:bg-red-600 transition"
+        >
+          Clear Team
+        </button>
+      )}
+    </div>
+  </div>
+)}
+
+
+
         {/* Footer */}
         <footer className="text-center text-white mt-12 pb-8">
           <p className="text-sm opacity-90">
