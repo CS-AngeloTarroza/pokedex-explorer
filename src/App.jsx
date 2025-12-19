@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Search, X, Zap, Shield, Heart, Swords, Filter, ChevronDown, Loader2, TrendingUp, Award, Info, Moon, Sun } from 'lucide-react';
+import { Search, X, Zap, Shield, Heart, Swords, Filter, ChevronDown, Loader2, TrendingUp, Award, Info, Moon, Sun, Users } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, BarChart, Bar } from 'recharts';
 
 // Type colors configuration
@@ -43,6 +43,8 @@ function App() {
   const [darkMode, setDarkMode] = useState(false);
   const [evolutionChain, setEvolutionChain] = useState(null);
   const [loadingEvolution, setLoadingEvolution] = useState(false);
+  const [team, setTeam] = useState([]);
+  const [showTeamBuilder, setShowTeamBuilder] = useState(false);
 
   // Fetch all Pokemon data on mount
   useEffect(() => {
@@ -214,6 +216,49 @@ function App() {
     setCompareList(compareList.filter(p => p.id !== id));
   };
 
+  // Team builder functions
+  const addToTeam = (p) => {
+    if (team.length < 6 && !team.find(tp => tp.id === p.id)) {
+      setTeam([...team, p]);
+    }
+  };
+
+  const removeFromTeam = (id) => {
+    setTeam(team.filter(p => p.id !== id));
+  };
+
+  const clearTeam = () => {
+    setTeam([]);
+  };
+
+  // Get team type coverage
+  const getTeamTypeCoverage = () => {
+    const typeCounts = {};
+    team.forEach(p => {
+      p.types.forEach(t => {
+        typeCounts[t.type.name] = (typeCounts[t.type.name] || 0) + 1;
+      });
+    });
+    return typeCounts;
+  };
+
+  // Get team average stats
+  const getTeamAverageStats = () => {
+    if (team.length === 0) return null;
+    
+    const statNames = ['hp', 'attack', 'defense', 'special-attack', 'special-defense', 'speed'];
+    const averages = {};
+    
+    statNames.forEach(statName => {
+      const total = team.reduce((sum, p) => {
+        return sum + (p.stats.find(s => s.stat.name === statName)?.base_stat || 0);
+      }, 0);
+      averages[statName] = Math.round(total / team.length);
+    });
+    
+    return averages;
+  };
+
   // Get comparison chart data
   const getComparisonData = () => {
     if (compareList.length === 0) return [];
@@ -331,7 +376,21 @@ function App() {
         {/* Header */}
         <header className="text-center mb-8 relative">
           {/* Dark Mode Toggle */}
-          <div className="absolute top-0 right-0 z-10">
+          <div className="absolute top-0 right-0 z-10 flex gap-3">
+            {/* Team Builder Toggle */}
+            <button
+              onClick={() => setShowTeamBuilder(!showTeamBuilder)}
+              className={`p-3 rounded-full ${darkMode ? 'bg-gray-800 text-green-400' : 'bg-white text-gray-800'} shadow-lg hover:scale-110 transition-all duration-300 relative`}
+              aria-label="Toggle team builder"
+            >
+              <Users className="w-6 h-6" />
+              {team.length > 0 && (
+                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                  {team.length}
+                </span>
+              )}
+            </button>
+            
             <button
               onClick={() => setDarkMode(!darkMode)}
               className={`p-3 rounded-full ${darkMode ? 'bg-gray-800 text-yellow-400' : 'bg-white text-gray-800'} shadow-lg hover:scale-110 transition-all duration-300`}
@@ -732,6 +791,22 @@ function App() {
                       Details
                     </button>
                   </div>
+                  
+                  {/* Add to Team Button */}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      addToTeam(p);
+                    }}
+                    className={`w-full mt-2 py-2 rounded-lg font-semibold transition ${
+                      team.length >= 6 || team.find(tp => tp.id === p.id)
+                        ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                        : 'bg-green-500 text-white hover:bg-green-600'
+                    }`}
+                    disabled={team.length >= 6 || team.find(tp => tp.id === p.id)}
+                  >
+                    {team.find(tp => tp.id === p.id) ? '✓ In Team' : '+ Add to Team'}
+                  </button>
                 </div>
               </div>
             ))}
